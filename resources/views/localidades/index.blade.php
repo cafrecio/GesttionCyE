@@ -49,25 +49,36 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            @forelse ($localidades as $localidade)
-                                                <tr>
-                                                    <td>{{ $localidade->id }}</td>
-                                                    <td>{{ $localidade->nombre }}</td>
-                                                    <td>{{ $localidade->provincia->nombre ?? 'N/A' }}</td>
-                                                    <td>{{ $localidade->zona->nombre ?? 'N/A' }}</td>
-                                                    <td>
-                                                        <a href="{{ route('localidades.edit', $localidade->id) }}" class="btn btn-sm btn-primary"><i class="fas fa-edit"></i> Editar</a>
-                                                        <form action="{{ route('localidades.destroy', $localidade->id) }}" method="POST" style="display: inline;">
-                                                            @csrf
-                                                            @method('DELETE')
-                                                            <button type="submit" class="btn btn-sm btn-danger"><i class="fas fa-trash"></i> Eliminar</button>
-                                                        </form>
-                                                    </td>
-                                                </tr>
-                                            @empty
-                                                <tr><td colspan="7">No hay localidades registradas.</td></tr>
-                                            @endforelse
+                                        @forelse ($localidades as $localidade)
+                                            <tr>
+                                                <td>{{ $localidade->id }}</td>
+                                                <td>{{ $localidade->nombre }}</td>
+                                                <td>{{ $localidade->provincia->nombre ?? 'N/A' }}</td>
+                                                <td>{{ $localidade->zona->nombre ?? 'N/A' }}</td>
+                                                <td>
+                                                    <a href="{{ route('localidades.edit', $localidade->id) }}" class="btn btn-sm btn-primary">
+                                                        <i class="fas fa-edit"></i> Editar
+                                                    </a>
+                                                    <form action="{{ route('localidades.destroy', $localidade) }}"
+                                                        method="POST" style="display:inline">
+                                                        @csrf
+                                                        @method('DELETE')
+
+                                                        <button type="submit"
+                                                                class="btn btn-danger btn-sm"
+                                                                onclick="return confirm('¿Seguro que querés eliminar {{ $localidade->nombre }}?')">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    </form>
+                                                </td>
+                                            </tr>
+                                        @empty
+                                            <tr>
+                                                <td colspan="5">No hay localidades registradas.</td>
+                                            </tr>
+                                        @endforelse
                                         </tbody>
+
                                     </table>
                                 </div>
                             </div>

@@ -55,7 +55,7 @@ class LocalidadeController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Localidade $localidad)
+    /**public function edit(Localidade $localidad)
     {
         $provincias = Provincia::all();
         $zonas = Zona::all();
@@ -65,25 +65,42 @@ class LocalidadeController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Localidade $localidad)
+    public function edit($id) // Cambiamos la inyección de dependencia a un ID y lo nombramos $id para claridad
     {
-        $request->validate([
-            'nombre' => 'required|string|max:255',
-            'provincia_id' => 'required|exists:provincias,id',
-            'zona_id' => 'required|exists:zonas,id', // Aquí también hacemos que zona_id sea requerido
-            // 'latitud' => 'nullable|numeric',
-            // 'longitud' => 'nullable|numeric',
-        ]);
-        $localidad->update($request->all());
-        return redirect()->route('localidades.index')->with('success', 'Localidad actualizada exitosamente.');
+    $localidad = Localidade::findOrFail($id); // Buscamos la localidad por el ID
+    $provincias = Provincia::all();
+    $zonas = Zona::all();
+    return view('localidades.edit', compact('localidad', 'provincias', 'zonas'));
     }
+   
+    // 👇 poné exactamente el mismo nombre que usa la ruta {localidade}
+    public function update(Request $request, Localidade $localidade)
+    {
+        // 1) validación
+        $data = $request->validate([
+            'nombre'        => 'required|string|max:255',
+            'provincia_id'  => 'required|exists:provincias,id',
+            'zona_id'       => 'required|exists:zonas,id',
+        ]);
+
+        // 2) actualización
+        $localidade->update($data);
+
+        // 3) redirección
+        return redirect()
+            ->route('localidades.index')
+            ->with('success', 'Localidad actualizada exitosamente.');
+    }
+
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Localidade $localidad)
+    public function destroy(Localidade $localidade)
     {
-        $localidad->delete();
-        return redirect()->route('localidades.index')->with('success', 'Localidad eliminada exitosamente.');
+        $localidade->delete();        // borra
+        return redirect()
+            ->route('localidades.index')
+            ->with('success', 'Localidad eliminada');
     }
 }
