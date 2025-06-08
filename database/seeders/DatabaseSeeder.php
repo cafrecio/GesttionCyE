@@ -16,6 +16,9 @@ class DatabaseSeeder extends Seeder
         $this->call([
             ProvinciasTableSeeder::class, // Descomenta y agrega si creaste el seeder de provincias
             ZonasTableSeeder::class,
+            TiposContactoSeeder::class,
+            ProvinciasSeederExtra::class,
+            LocalidadesSeederMain::class,
         ]);
     }
 }

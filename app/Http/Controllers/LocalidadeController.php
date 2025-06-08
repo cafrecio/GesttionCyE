@@ -14,10 +14,11 @@ class LocalidadeController extends Controller
      */
     public function index()
     {
-        $localidades = Localidade::all();
-        return view('localidades.index', compact('localidades'));
+    $localidades = Localidade::with('provincia','zona')   // eager load
+                    ->orderBy('nombre')
+                    ->paginate(25);                      // ← antes era get()
+    return view('localidades.index', compact('localidades'));
     }
-
     /**
      * Show the form for creating a new resource.
      */
@@ -41,7 +42,7 @@ class LocalidadeController extends Controller
             // 'longitud' => 'nullable|numeric',
         ]);
         Localidade::create($request->all());
-        return redirect()->route('localidades.index')->with('success', 'Localidad creada exitosamente.');
+        return back()->with('success', 'Localidad creada correctamente.');
     }
 
     /**
