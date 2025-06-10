@@ -1,77 +1,74 @@
-{{-- Modal LISTADO de sucursales --}}
-<div class="modal fade"
-     id="sucursales-{{ $cliente->codigo }}"
-     tabindex="-1"
-     aria-labelledby="sucursalesLabel-{{ $cliente->codigo }}"
-     aria-hidden="true">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
+<div class="modal fade" id="modalSucursales-{{ $cliente->codigo }}" tabindex="-1" aria-labelledby="modalSucursalesLabel-{{ $cliente->codigo }}" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalSucursalesLabel-{{ $cliente->codigo }}">
+                    Sucursales de {{ $cliente->razon_social }}
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                @if(session('modal_cliente_codigo') == $cliente->codigo && $errors->any())
+                    <div class="alert alert-danger">
+                        <ul class="mb-0">
+                            @foreach($errors->all() as $err)
+                                <li>{{ $err }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
 
-      <div class="modal-header">
-        <h5 class="modal-title" id="sucursalesLabel-{{ $cliente->codigo }}">
-          Sucursales de {{ $cliente->razon_social }}
-        </h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
+                @if ($cliente->sucursales->count())
+                    <table class="table table-sm align-middle">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Calle/Número</th>
+                                <th>Localidad</th>
+                                <th>Provincia</th>
+                                <th>Zona</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($cliente->sucursales as $sucursale)
+                                <tr>
+                                    <td>{{ $sucursale->nombre }}</td>
+                                    <td>{{ $sucursale->calle }} {{ $sucursale->numero }}</td>
+                                    <td>{{ $sucursale->localidad->nombre ?? '-' }}</td>
+                                    <td>{{ $sucursale->provincia->nombre ?? '-' }}</td>
+                                    <td>{{ $sucursale->zona->nombre ?? '-' }}</td>
+                                    <td>
+                                        <button class="btn btn-outline-primary btn-sm abrir-modal-editar-sucursal"
+                                            data-cliente="{{ $cliente->codigo }}"
+                                            data-sucursal="{{ $sucursale->id }}">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <form action="{{ route('clientes.sucursales.destroy', [$cliente->codigo, $sucursale->id]) }}"
+                                              method="POST" style="display:inline;">
+                                            @csrf @method('DELETE')
+                                            <button class="btn btn-outline-danger btn-sm"
+                                                    onclick="return confirm('¿Eliminar sucursal?')">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                @else
+                    <p class="text-muted">Sin sucursales cargadas.</p>
+                @endif
 
-      <div class="modal-body">
-
-        {{-- LISTA --}}
-        @if ($cliente->sucursales->count())
-          <ul class="list-group mb-3">
-            @foreach ($cliente->sucursales as $sc)
-              <li class="list-group-item d-flex justify-content-between align-items-center">
-                <span>
-                  <strong>{{ $sc->nombre }}</strong>
-                  <small class="text-muted">
-                    ({{ $sc->localidad->nombre ?? '-' }})
-                  </small>
-                </span>
-                <span>
-                  {{-- Toggle activo --}}
-                  <form  action="{{ route('sucursales.toggle', $sc) }}"
-                         method="POST" class="d-inline">
-                    @csrf
-                    <button class="btn btn-sm {{ $sc->activo ? 'btn-success' : 'btn-secondary' }}"
-                            title="Cambiar estado">
-                      <i class="fas fa-toggle-{{ $sc->activo ? 'on' : 'off' }}"></i>
-                    </button>
-                  </form>
-
-                  {{-- Editar --}}
-                  <button class="btn btn-sm btn-primary"
-                          data-bs-toggle="modal"
-                          data-bs-target="#editSucursal-{{ $sc->id }}"
-                          data-bs-dismiss="modal">
-                    <i class="fas fa-edit"></i>
-                  </button>
-                </span>
-              </li>
-
-              {{-- EDIT — se inyecta fuera del modal-lista --}}
-              @push('modals')
-                @include('sucursales._modal_edit', ['sucursale'=>$sc, 'cliente'=>$cliente])
-              @endpush
-            @endforeach
-          </ul>
-        @else
-          <p class="text-muted">Sin sucursales cargadas.</p>
-        @endif
-
-        {{-- NUEVA --}}
-        <button  class="btn btn-outline-primary btn-sm"
-                 data-bs-toggle="modal"
-                 data-bs-target="#addSucursal-{{ $cliente->codigo }}"
-                 data-bs-dismiss="modal">
-          <i class="fas fa-plus"></i> Nueva sucursal
-        </button>
-
-        @push('modals')
-          @include('sucursales._modal_create', ['cliente'=>$cliente])
-        @endpush
-
-      </div>
+                <button class="btn btn-success abrir-modal-crear-sucursal"
+                        data-cliente="{{ $cliente->codigo }}">
+                    <i class="fas fa-plus"></i> Nueva sucursal
+                </button>
+            </div>
+        </div>
     </div>
-  </div>
 </div>
+
+
 

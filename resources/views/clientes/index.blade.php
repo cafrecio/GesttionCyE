@@ -82,6 +82,13 @@
                         {{ $cliente->contactos->count() }} contacto(s)
                     </button>
                 </td>
+                <td>
+                    <button class="btn btn-link p-0"
+                            data-bs-toggle="modal"
+                            data-bs-target="#modalSucursales-{{ $cliente->codigo }}">
+                        {{ $cliente->sucursales->count() }} sucursal(es)
+                    </button>
+                </td>
             </tr>
         @endforeach
     </tbody>
@@ -103,6 +110,20 @@
     @include('contactos._modal_create', ['cliente' => $cliente])
     @foreach ($cliente->contactos as $contacto)
         @include('contactos._modal_edit', ['cliente' => $cliente, 'contacto' => $contacto])
+    @endforeach
+@endforeach
+
+{{-- MODALES DE SUCURSALES (LISTA) --}}
+@foreach ($clientes as $cliente)
+    @include('sucursales._modal_list', ['cliente' => $cliente])
+@endforeach
+
+{{-- MODALES CREAR Y EDITAR --}}
+{{-- Se generan todos los modales de crear y editar fuera de los modales-lista --}}
+@foreach ($clientes as $cliente)
+    @include('sucursales._modal_create', ['cliente' => $cliente])
+    @foreach ($cliente->sucursales as $sucursale)
+        @include('sucursales._modal_edit', ['cliente' => $cliente, 'sucursale' => $sucursale])
     @endforeach
 @endforeach
 
@@ -129,6 +150,92 @@ document.addEventListener('DOMContentLoaded', function () {
             var modalEditar = document.getElementById('modalEditarContacto-' + clienteCodigo + '-' + contactoId);
             var bsModalEditar = new bootstrap.Modal(modalEditar);
             bsModalEditar.show();
+        });
+    });
+});
+document.addEventListener('DOMContentLoaded', function () {
+    // Modal crear sucursal
+    document.querySelectorAll('.abrir-modal-crear-sucursal').forEach(function(btn) {
+        btn.addEventListener('click', function () {
+            var clienteCodigo = btn.getAttribute('data-cliente');
+            var modalCrear = document.getElementById('modalCrearSucursal-' + clienteCodigo);
+            var bsModalCrear = new bootstrap.Modal(modalCrear);
+            bsModalCrear.show();
+        });
+    });
+
+    // Modal editar sucursal
+    document.querySelectorAll('.abrir-modal-editar-sucursal').forEach(function(btn) {
+        btn.addEventListener('click', function () {
+            var clienteCodigo = btn.getAttribute('data-cliente');
+            var sucursalId = btn.getAttribute('data-sucursal');
+            var modalEditar = document.getElementById('modalEditarSucursal-' + clienteCodigo + '-' + sucursalId);
+            var bsModalEditar = new bootstrap.Modal(modalEditar);
+            bsModalEditar.show();
+        });
+    });
+
+    // AJAX para localidades por provincia en crear y editar sucursal
+    document.querySelectorAll('[id^="modalCrearSucursal-"], [id^="modalEditarSucursal-"]').forEach(function(modal){
+        modal.addEventListener('shown.bs.modal', function () {
+            let provinciaSelect = modal.querySelector('select[name="provincia_id"]');
+            let localidadSelect = modal.querySelector('select[name="localidade_id"]');
+            let localidadIdOld = localidadSelect ? localidadSelect.getAttribute('data-old') : null;
+
+            if(provinciaSelect && localidadSelect){
+                provinciaSelect.onchange = function(){
+                    let provinciaId = this.value;
+                    localidadSelect.innerHTML = '<option value="">Cargando...</option>';
+                    if(provinciaId){
+                        fetch('/ajax/localidades/' + provinciaId)
+                            .then(r => r.json())
+                            .then(list => {
+                                localidadSelect.innerHTML = '<option value="">Seleccione...</option>';
+                                list.forEach(loc => {
+                                    let option = document.createElement('option');
+                                    option.value = loc.id;
+                                    option.text = loc.nombre;
+                                    if(localidadIdOld && localidadIdOld == loc.id){
+                                        option.selected = true;
+                                    }
+                                    localidadSelect.appendChild(option);
+                                });
+                            });
+                    } else {
+                        localidadSelect.innerHTML = '<option value="">Seleccione provincia primero</option>';
+                    }
+                }
+                // Trigger on load (editar)
+                if(provinciaSelect.value){
+                    localidadSelect.setAttribute('data-old', localidadSelect.value || '');
+                    provinciaSelect.onchange();
+                }
+            }
+
+            // Si hay select de transporte en este modal
+            let transporteSelect = modal.querySelector('select[id^="transporte_id_"]');
+            let sucursalTransporteSelect = modal.querySelector('select[name="transporte_sucursale_id"]');
+            if(transporteSelect && sucursalTransporteSelect){
+                transporteSelect.onchange = function() {
+                    let transporteId = this.value;
+                    sucursalTransporteSelect.innerHTML = '<option value="">Cargando...</option>';
+                    if(transporteId){
+                        fetch('/ajax/sucursales-transporte/' + transporteId)
+                            .then(r => r.json())
+                            .then(list => {
+                                sucursalTransporteSelect.innerHTML = '<option value="">Seleccione sucursal...</option>';
+                                list.forEach(loc => {
+                                    let option = document.createElement('option');
+                                    option.value = loc.id;
+                                    option.text = loc.nombre + ' (' + (loc.localidad_nombre || '-') + ', ' + (loc.provincia_nombre || '-') + ')';
+                                    sucursalTransporteSelect.appendChild(option);
+                                });
+                            });
+                    } else {
+                        sucursalTransporteSelect.innerHTML = '<option value="">Seleccione transporte primero</option>';
+                    }
+                }
+            }
         });
     });
 });

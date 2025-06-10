@@ -21,7 +21,6 @@ class Sucursale extends Model
     public function cliente()
     {
         return $this->belongsTo(Cliente::class, 'cliente_id', 'codigo');
-        // OJO: 'codigo' es el campo único en Cliente (igual al ERP)
     }
     public function provincia()
     {

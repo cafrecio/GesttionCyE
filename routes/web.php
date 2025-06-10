@@ -4,13 +4,14 @@ use Illuminate\Support\Facades\Route;
 
 // Traemos los controladores
 use App\Http\Controllers\ClienteController;
-use App\Http\Controllers\ContactoController;
 use App\Http\Controllers\ProvinciaController;
 use App\Http\Controllers\LocalidadeController;
 use App\Http\Controllers\ZonaController;
 use App\Http\Controllers\TransporteController;
 use App\Http\Controllers\TipoContactoController;
 use App\Http\Controllers\TransporteSucursaleController;
+use App\Http\Controllers\ContactoController;
+use App\Http\Controllers\SucursaleController;
 
 /*
 |--------------------------------------------------------------------------
@@ -60,7 +61,7 @@ Route::get('ajax/zona-por-localidad/{localidad_id}', [ZonaController::class, 'ge
 Route::resource('transportes', TransporteController::class)->except(['show', 'destroy']); // no hay destroy, sólo toggle
 
 // Toggle para activo/inactivo en transportes
-Route::post('transportes/{transporte}/toggle-activo', [TransporteController::class, 'toggleActivo'])->name('transportes.toggleActivo');
+Route::post('transportes/{transporte}/toggle', [TransporteController::class, 'toggle'])->name('transportes.toggle');
 
 // =================== TRANSPORTE SUCURSALES ===================
 /*
@@ -75,3 +76,10 @@ Route::get('ajax/transporte-sucursales/{transporte_id}', [TransporteSucursaleCon
 
 // =================== TIPO DE CONTACTO ===================
 Route::resource('tipo-contactos', TipoContactoController::class)->except(['show']);
+// Sucursales por cliente (solo dentro de clientes)
+Route::post('clientes/{cliente}/sucursales', [SucursaleController::class, 'store'])->name('clientes.sucursales.store');
+Route::put('clientes/{cliente}/sucursales/{sucursale}', [SucursaleController::class, 'update'])->name('clientes.sucursales.update');
+Route::delete('clientes/{cliente}/sucursales/{sucursale}', [SucursaleController::class, 'destroy'])->name('clientes.sucursales.destroy');
+Route::get('/ajax/localidades/{provincia}', function($provinciaId){
+    return \App\Models\Localidade::where('provincia_id', $provinciaId)->orderBy('nombre')->get(['id','nombre']);
+});
