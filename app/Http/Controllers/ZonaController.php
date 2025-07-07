@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Zona;
+use App\Models\Localidade;
 use Illuminate\Http\Request;
 
 class ZonaController extends Controller
@@ -71,4 +72,13 @@ class ZonaController extends Controller
         $zona->delete();
         return redirect()->route('zonas.index')->with('success', 'Zona eliminada exitosamente.');
     }
+    public function getByLocalidad($localidadeId)
+    {
+        $loc = Localidade::with('zona')->findOrFail($localidadeId);
+        return response()->json([
+        'id'     => $loc->zona->id,
+        'nombre' => $loc->zona->nombre,
+        ]);
+    }
+
 }

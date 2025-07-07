@@ -104,4 +104,12 @@ class LocalidadeController extends Controller
             ->route('localidades.index')
             ->with('success', 'Localidad eliminada');
     }
+    public function getByProvincia($provinciaId)
+    {
+        $localidades = Localidade::where('provincia_id', $provinciaId)
+            ->orderBy('nombre')
+            ->get(['id','nombre']);
+
+        return response()->json($localidades);
+    }
 }

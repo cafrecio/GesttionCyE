@@ -55,6 +55,23 @@ public function toggle(TransporteSucursale $sucursale)
         $sucursale->save();
         return back()->with('success', 'Sucursal actualizada.');
     }
+    public function getByTransporte($transporteId)
+    {
+        $sucursales = TransporteSucursale::with(['provincia','localidad'])
+            ->where('transporte_id', $transporteId)
+            ->get();
+
+        $data = $sucursales->map(function($s) {
+            return [
+                'id'                => $s->id,
+                'nombre'            => $s->nombre,
+                'provincia_nombre'  => optional($s->provincia)->nombre,
+                'localidad_nombre'  => optional($s->localidad)->nombre,
+            ];
+        });
+
+        return response()->json($data);
+    }
 }
 
 
